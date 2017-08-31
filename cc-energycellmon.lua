@@ -54,7 +54,8 @@ while true do
 	local msg = "No energy cells"
 	logIt("")
 	for i = 1, #periList do
-		if peripheral.getType(periList[i]) == ENERGY_CELL_TYPE then
+		local nextType = peripheral.getType(periList[i])
+		if nextType == ENERGY_CELL_TYPE then
 			cellCount = cellCount + 1
 			local currentLvl = peripheral.call(periList[i], "getEnergyStored", periList[i])
 			local maxLvl = peripheral.call(periList[i], "getMaxEnergyStored", periList[i])
