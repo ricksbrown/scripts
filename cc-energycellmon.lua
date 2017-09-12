@@ -1,17 +1,19 @@
 -- https://github.com/ricksbrown/scripts/blob/master/cc-energycellmon.lua
 -- Magmatic dynamos keep discharging (and therefore burn lava constantly).
--- This script measures any connected energy cells and, when they are all fully charged, outputs a redstone signal.
+-- This script measures any connected energy cells and, when they are all fully charged, outputs a rednet signal (use rednet cable).
 -- This can be used to turn off magmatic dynamos (or the fluiducts that feed them).
 -- Energy cells can be added and removed and the script will adapt.
 -- It is expected that energy cells (and a monitor) will be connected via network cables and modems.
 
 -- Change REDSTONE_SIDE to reflect where you are connecting your redstone, e.g. "left"
+-- Change REDNET_CHANNEL if necessary
 -- Save this program in your computer, for example as "cellMonitor", you could use the command:
--- pastebin get u18MpTde cellMonitor
+-- pastebin get 3VFpR7j3 cellMonitor
 -- then call it from a program named "startup" like so:
 -- shell.run("cellMonitor")
 
-local REDSTONE_SIDE = "bottom"
+local REDSTONE_SIDE = "right"
+local REDNET_CHANNEL = colors.white
 local TOLERANCE = 0.1 -- Cell capacity can fall by this much before changing the output state
 local POLL_INTERVAL = 6 -- How many seconds between checks, e.g. 6
 
@@ -79,11 +81,11 @@ while true do
 	end
 	if allCharged then
 		-- There are no cells that need charging
-		redstone.setOutput(REDSTONE_SIDE, true)
+		redstone.setBundledOutput(REDSTONE_SIDE, REDNET_CHANNEL)
 	elseif thresholdReached then
 		-- A connected cell has gone below the allowed threshold
-		redstone.setOutput(REDSTONE_SIDE, false)
-	elseif redstone.getOutput(REDSTONE_SIDE) then
+		redstone.setBundledOutput(REDSTONE_SIDE, 0)
+	elseif redstone.testBundledInput(REDSTONE_SIDE, REDNET_CHANNEL) then
 		-- Discharging but not reached threshold
 		logIt("Will charge at < "..100 - (100 * TOLERANCE).."%")
 	else
