@@ -8,6 +8,11 @@
 # Start it from cron something like so: 
 # @reboot /path/to/crashDetect.sh
 
+# You can fetch this script like so:
+# wget https://raw.githubusercontent.com/ricksbrown/scripts/master/crashDetect.sh
+# Then of course you will need:
+# chmod +x crashDetect.sh
+
 PROCESS="java"
 PROCANDARGS="./launchmcRB.sh"
 
@@ -17,7 +22,8 @@ do
     RESULT=`pgrep ${PROCESS}`
 
     if [ "${RESULT:-null}" = null ]; then
-            echo "${PROCESS} not running, starting "$PROCANDARGS
+            echo "crash detected at: "`date -u` >> crashDetect.log
+            echo "  > starting "$PROCANDARGS >> crashDetect.log
             $PROCANDARGS &
     else
             echo "running"
