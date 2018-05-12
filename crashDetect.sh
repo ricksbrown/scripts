@@ -9,7 +9,7 @@
 # @reboot /path/to/crashDetect.sh
 
 # You can fetch this script like so:
-# wget https://raw.githubusercontent.com/ricksbrown/scripts/master/crashDetect.sh
+# wget --no-cache https://raw.githubusercontent.com/ricksbrown/scripts/master/crashDetect.sh
 # Then of course you will need:
 # chmod +x crashDetect.sh
 
