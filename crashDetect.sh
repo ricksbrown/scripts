@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# PROCESS="$1"
+# PROCANDARGS=$*
+
+# This script is intended to detect that minecraft server has crashed and restart it.
+# It is a modified version of https://stackoverflow.com/a/16787862/3847000
+# Start it from cron something like so: 
+# @reboot /path/to/crashDetect.sh
+
+PROCESS="java"
+PROCANDARGS="./launchmcRB.sh"
+
+while :
+do
+    sleep 300
+    RESULT=`pgrep ${PROCESS}`
+
+    if [ "${RESULT:-null}" = null ]; then
+            echo "${PROCESS} not running, starting "$PROCANDARGS
+            $PROCANDARGS &
+    else
+            echo "running"
+    fi
+    # sleep 10
+done
+
