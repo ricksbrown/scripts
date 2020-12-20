@@ -44,17 +44,13 @@ def fromgdate(goog_date, goog_time):
 	return result
 
 
-def main():
-	nag()
-
-
 def nag():
 	engine = pyttsx3.init()
 	now = datetime.datetime.now().astimezone()
 	msgs = []
 	if datetime.time(20, 30) <= now.time() < datetime.time(23, 59):
 		msgs.append('Hello children, go to bed')
-	elif datetime.time(18, 55) <= now.time() < datetime.time(20, 1):
+	elif datetime.time(18, 55) <= now.time() < datetime.time(19, 55):
 		msgs.append('Hello children, do your chores')
 	else:
 		classroom = Classroom()
@@ -65,7 +61,7 @@ def nag():
 				due_date = fromgdate(work['dueDate'], work['dueTime'])
 				msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
 		else:
-			msgs.append('All homework complete')
+			msgs.append('Yay, all homework complete')
 
 	for msg in msgs:
 		print(msg)
@@ -186,6 +182,10 @@ class Cache:
 		file_path = self.get_file_path(course_work_id)
 		if os.path.exists(file_path):
 			os.remove(file_path)
+
+
+def main():
+	nag()
 
 
 if __name__ == '__main__':
