@@ -9,8 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = [
-		'https://www.googleapis.com/auth/classroom.courses.readonly',
+SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly',
 		'https://www.googleapis.com/auth/classroom.coursework.me.readonly']
 
 
@@ -45,7 +44,6 @@ def fromgdate(goog_date, goog_time):
 
 
 def nag():
-	engine = pyttsx3.init()
 	now = datetime.datetime.now().astimezone()
 	msgs = []
 	if datetime.time(20, 30) <= now.time() < datetime.time(23, 59):
@@ -62,7 +60,11 @@ def nag():
 				msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
 		else:
 			msgs.append('Yay, all homework complete')
+	say(msgs)
 
+
+def say(msgs):
+	engine = pyttsx3.init()
 	for msg in msgs:
 		print(msg)
 		engine.say(msg)
@@ -70,7 +72,6 @@ def nag():
 
 
 class Classroom:
-
 	def __init__(self):
 		# The file token.pickle stores the user's access and refresh tokens, and is
 		# created automatically when the authorization flow completes for the first
@@ -185,7 +186,10 @@ class Cache:
 
 
 def main():
-	nag()
+	try:
+		nag()
+	except:
+		say(['Error, something went wrong'])
 
 
 if __name__ == '__main__':
