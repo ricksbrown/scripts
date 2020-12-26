@@ -1,5 +1,7 @@
+import sys
 from __future__ import print_function
 import datetime
+import time
 import pickle
 import os
 import json
@@ -95,7 +97,11 @@ class Classroom:
 
 	def get_course_list(self):
 		# Returns a list of active courses for the current student
-		results = self.service.courses().list(courseStates='ACTIVE', studentId='me').execute()
+		course_cache = Cache('courses')
+		results = course_cache.get('me', 86400)
+		if results is None:
+			results = self.service.courses().list(courseStates='ACTIVE', studentId='me').execute()
+			course_cache.put('me', results)
 		courses = results.get('courses', [])
 		if 'nextPageToken' in results:
 			print('Has more pages ' + results['nextPageToken'])
@@ -151,6 +157,11 @@ class Cache:
 	def __init__(self, course_id):
 		self.course_id = course_id
 
+	def getAge(self, file_path):
+		file_info = os.stat(file_path)
+		result = (time.time() - file_info.st_mtime)
+		return result
+
 	def get_cache_path(self):
 		if not os.path.exists(self.cache_root):
 			os.mkdir(self.cache_root)
@@ -170,13 +181,16 @@ class Cache:
 		with open(file_path, 'w', encoding='utf-8') as f:
 			json.dump(obj, f, ensure_ascii=False, indent=4)
 
-	def get(self, course_work_id):
+	def get(self, course_work_id, max_age=0):
 		file_path = self.get_file_path(course_work_id)
 		if os.path.exists(file_path):
 			# print('Cache hit ' + filePath)
-			with open(file_path) as f:
-				data = json.load(f)
-				return data
+			if max_age:
+				age = self.getAge(file_path)
+				if age < max_age:
+					with open(file_path) as f:
+						data = json.load(f)
+						return data
 		return None
 
 	def clear(self, course_work_id):
