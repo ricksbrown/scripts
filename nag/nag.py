@@ -45,7 +45,7 @@ def fromgdate(goog_date, goog_time):
 	return result
 
 
-def nag():
+def nag(students=['me']):
 	now = datetime.datetime.now().astimezone()
 	msgs = []
 	if datetime.time(20, 30) <= now.time() < datetime.time(23, 59):
@@ -53,15 +53,16 @@ def nag():
 	elif datetime.time(18, 55) <= now.time() < datetime.time(19, 55):
 		msgs.append('Hello children, do your chores')
 	else:
-		classroom = Classroom()
-		not_submitted = classroom.get_not_submitted()
-		if len(not_submitted) > 0:
-			msgs.append('Pending homework')
-			for work in not_submitted:
-				due_date = fromgdate(work['dueDate'], work['dueTime'])
-				msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
-		else:
-			msgs.append('Yay, all homework complete')
+		for student_id in students:
+			classroom = Classroom(student_id)
+			not_submitted = classroom.get_not_submitted()
+			if len(not_submitted) > 0:
+				msgs.append(f'Pending homework for {student_id}')
+				for work in not_submitted:
+					due_date = fromgdate(work['dueDate'], work['dueTime'])
+					msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
+			else:
+				msgs.append(f'Yay, all homework complete for {student_id}')
 	say(msgs)
 
 
@@ -74,12 +75,14 @@ def say(msgs):
 
 
 class Classroom:
-	def __init__(self):
+	def __init__(self, student_id='me'):
 		# The file token.pickle stores the user's access and refresh tokens, and is
 		# created automatically when the authorization flow completes for the first
 		# time.
-		if os.path.exists('token.pickle'):
-			with open('token.pickle', 'rb') as token:
+		pickle_name = f'token-{student_id}.pickle'
+		credentials_name = f'credentials-{student_id}.json'
+		if os.path.exists(pickle_name):
+			with open(pickle_name, 'rb') as token:
 				credentials = pickle.load(token)
 		# If there are no (valid) credentials available, let the user log in.
 		if not credentials or not credentials.valid:
@@ -87,21 +90,22 @@ class Classroom:
 				credentials.refresh(Request())
 			else:
 				flow = InstalledAppFlow.from_client_secrets_file(
-					'credentials.json', SCOPES)
+					credentials_name, SCOPES)
 				credentials = flow.run_local_server(port=0)
 			# Save the credentials for the next run
-			with open('token.pickle', 'wb') as token:
+			with open(pickle_name, 'wb') as token:
 				pickle.dump(credentials, token)
 
 		self.service = build('classroom', 'v1', credentials=credentials)
+		self.studentId = student_id
 
 	def get_course_list(self):
 		# Returns a list of active courses for the current student
 		course_cache = Cache('courses')
-		results = course_cache.get('me', 86400)
+		results = course_cache.get(self.studentId, 86400)
 		if results is None:
-			results = self.service.courses().list(courseStates='ACTIVE', studentId='me').execute()
-			course_cache.put('me', results)
+			results = self.service.courses().list(courseStates='ACTIVE', studentId=self.studentId).execute()
+			course_cache.put(self.studentId, results)
 		courses = results.get('courses', [])
 		if 'nextPageToken' in results:
 			print('Has more pages ' + results['nextPageToken'])
@@ -123,7 +127,7 @@ class Classroom:
 		results = course_cache.get(course_work_id)
 		if results is None:
 			results = self.service.courses().courseWork().studentSubmissions().list(
-				userId='me',
+				userId=self.studentId,
 				courseId=course_id,
 				courseWorkId=course_work_id).execute()
 			course_cache.put(course_work_id, results)
@@ -199,12 +203,15 @@ class Cache:
 			os.remove(file_path)
 
 
-def main():
+def main(argv):
 	try:
-		nag()
+		nag(argv)
 	except:
 		say(['Error, something went wrong'])
 
 
 if __name__ == '__main__':
-	main()
+	if len(sys.argv) > 1:
+		main(sys.argv[1:])
+	else:
+		main(['me'])
