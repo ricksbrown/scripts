@@ -5,11 +5,11 @@ import time
 import pickle
 import os
 import json
-import pyttsx3
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-from notify import show
+from notify import show_all
+from say import get_sayer
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly',
@@ -42,38 +42,41 @@ def fromgdate(goog_date, goog_time):
 		goog_date['year'], goog_date['month'], goog_date['day'],
 		goog_time.get('hours', 23), goog_time.get('minutes', 59), goog_time.get('seconds', 59), 0,
 		tzinfo=datetime.timezone.utc)  # google dates are UTC
-	result = result.astimezone()  # converts it to local time
+	result = result.astimezone()  # converts it to local time, returns a datetime instance
 	return result
 
 
 def nag(students=['me']):
 	now = datetime.datetime.now().astimezone()
-	msgs = []
+	msg = 'Hello'
 	if datetime.time(20, 30) <= now.time() < datetime.time(23, 59):
-		msgs.append('Hello children, go to bed')
+		msg = 'Hello children, go to bed'
 	elif datetime.time(18, 55) <= now.time() < datetime.time(19, 55):
-		msgs.append('Hello children, do your chores')
+		msg = 'Hello children, do your chores'
 	else:
 		for student_id in students:
 			classroom = Classroom(student_id)
 			not_submitted = classroom.get_not_submitted()
-			if len(not_submitted) > 0:
-				msgs.append(f'Pending homework for {student_id}')
-				for work in not_submitted:
-					due_date = fromgdate(work['dueDate'], work['dueTime'])
-					msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d'))
+			processed = process_pending(not_submitted)
+			if processed['soonest']:
+				msg = f"Next homework due for {student_id} on {processed['soonest'].strftime('%B %d')}"
+				show_all(processed['msgs'])
 			else:
-				msgs.append(f'Yay, all homework complete for {student_id}')
-	say(msgs)
+				msg = f'Yay, all homework complete for {student_id}'
+	say = get_sayer()
+	say(msg)
 
 
-def say(msgs):
-	engine = pyttsx3.init()
-	for msg in msgs:
-		print(msg)
-		engine.say(msg)
-	engine.runAndWait()
-	show('\r\n'.join(msgs))
+def process_pending(not_submitted):
+	result = { 'msgs': [], 'soonest': None }
+
+	if len(not_submitted) > 0:
+		for work in not_submitted:
+			due_date = fromgdate(work['dueDate'], work['dueTime'])
+			if result['soonest'] == None or due_date < result['soonest']:
+				result['soonest'] = due_date
+			result['msgs'].append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
+	return result
 
 
 class Classroom:
@@ -189,11 +192,13 @@ class Cache:
 
 	def get(self, course_work_id, max_age=0):
 		file_path = self.get_file_path(course_work_id)
+		# print('Checking cache for ' + course_work_id)
 		if os.path.exists(file_path):
-			# print('Cache hit ' + filePath)
+			# print('Cache hit ' + course_work_id)
 			if max_age:
 				age = self.getAge(file_path)
 				if age < max_age:
+					# print('Cache still fresh for ' + course_work_id)
 					with open(file_path) as f:
 						data = json.load(f)
 						return data
@@ -209,6 +214,7 @@ def main(argv):
 	try:
 		nag(argv)
 	except:
+		say = get_sayer()
 		say(['Error, something went wrong'])
 
 
