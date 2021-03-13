@@ -9,6 +9,7 @@ import pyttsx3
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from notify import show
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly',
@@ -60,7 +61,7 @@ def nag(students=['me']):
 				msgs.append(f'Pending homework for {student_id}')
 				for work in not_submitted:
 					due_date = fromgdate(work['dueDate'], work['dueTime'])
-					msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
+					msgs.append(work['title'] + '" - ' + due_date.strftime('%B %d'))
 			else:
 				msgs.append(f'Yay, all homework complete for {student_id}')
 	say(msgs)
@@ -72,6 +73,7 @@ def say(msgs):
 		print(msg)
 		engine.say(msg)
 	engine.runAndWait()
+	show('\r\n'.join(msgs))
 
 
 class Classroom:
