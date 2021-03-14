@@ -1,15 +1,14 @@
 from __future__ import print_function
 import sys
 import datetime
-import time
 import pickle
 import os
-import json
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from notify import show_all
 from say import get_sayer
+from Cache import Cache
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly',
@@ -40,13 +39,12 @@ def some(a_list: list, f: callable):
 def fromgdate(goog_date, goog_time):
 	result = datetime.datetime(
 		goog_date['year'], goog_date['month'], goog_date['day'],
-		goog_time.get('hours', 23), goog_time.get('minutes', 59), goog_time.get('seconds', 59), 0,
-		tzinfo=datetime.timezone.utc)  # google dates are UTC
+		goog_time.get('hours', 23), goog_time.get('minutes', 59), goog_time.get('seconds', 59), 0, tzinfo=datetime.timezone.utc)  # google dates are UTC
 	result = result.astimezone()  # converts it to local time, returns a datetime instance
 	return result
 
 
-def nag(students=['me']):
+def nag(student_id='me'):
 	now = datetime.datetime.now().astimezone()
 	msg = 'Hello'
 	if datetime.time(20, 30) <= now.time() < datetime.time(23, 59):
@@ -54,26 +52,25 @@ def nag(students=['me']):
 	elif datetime.time(18, 55) <= now.time() < datetime.time(19, 55):
 		msg = 'Hello children, do your chores'
 	else:
-		for student_id in students:
-			classroom = Classroom(student_id)
-			not_submitted = classroom.get_not_submitted()
-			processed = process_pending(not_submitted)
-			if processed['soonest']:
-				msg = f"Next homework due for {student_id} on {processed['soonest'].strftime('%B %d')}"
-				show_all(processed['msgs'])
-			else:
-				msg = f'Yay, all homework complete for {student_id}'
+		classroom = Classroom(student_id)
+		not_submitted = classroom.get_not_submitted()
+		processed = process_pending(not_submitted)
+		if processed['soonest']:
+			msg = f"Next homework due for {student_id} on {processed['soonest'].strftime('%B %d')}"
+			show_all(processed['msgs'])
+		else:
+			msg = f'Yay, all homework complete for {student_id}'
 	say = get_sayer()
 	say(msg)
 
 
 def process_pending(not_submitted):
-	result = { 'msgs': [], 'soonest': None }
+	result = {'msgs': [], 'soonest': None}
 
 	if len(not_submitted) > 0:
 		for work in not_submitted:
 			due_date = fromgdate(work['dueDate'], work['dueTime'])
-			if result['soonest'] == None or due_date < result['soonest']:
+			if result['soonest'] is None or due_date < result['soonest']:
 				result['soonest'] = due_date
 			result['msgs'].append(work['title'] + '" - ' + due_date.strftime('%B %d, %Y'))
 	return result
@@ -127,9 +124,9 @@ class Classroom:
 		result = filter(lambda elem: 'dueDate' in elem, course_work)
 		return result
 
-	def get_submissions(self, course_id, course_work_id):
-		course_cache = Cache(course_id)
-		results = course_cache.get(course_work_id)
+	def get_submissions(self, course_id, course_work_id, cache=None):
+		course_cache = Cache(course_id) if cache is None else cache
+		results = course_cache.get(course_work_id, 86400)
 		if results is None:
 			results = self.service.courses().courseWork().studentSubmissions().list(
 				userId=self.studentId,
@@ -148,66 +145,12 @@ class Classroom:
 			if assignments:
 				for assignment in assignments:
 					due_date = fromgdate(assignment['dueDate'], assignment['dueTime'])
-					submissions = self.get_submissions(assignment['courseId'], assignment['id'])
+					cache = Cache(assignment['courseId'])
+					submissions = self.get_submissions(assignment['courseId'], assignment['id'], cache)
 					if len(submissions) < 1 or some(submissions, is_submitted_curry(due_date)):
 						result.append(assignment)
-						self.uncache(assignment)  # these must not be cached otherwise the state will never change
+						# cache.clear(assignment['id'])  # these must not be cached otherwise the state will never change
 		return result
-
-	@staticmethod
-	def uncache(assignment):
-		course_cache = Cache(assignment['courseId'])
-		course_cache.clear(assignment['id'])
-
-
-class Cache:
-	cache_root = 'cache'
-
-	def __init__(self, course_id):
-		self.course_id = course_id
-
-	def getAge(self, file_path):
-		file_info = os.stat(file_path)
-		result = (time.time() - file_info.st_mtime)
-		return result
-
-	def get_cache_path(self):
-		if not os.path.exists(self.cache_root):
-			os.mkdir(self.cache_root)
-		return os.path.join(self.cache_root, self.course_id)
-
-	def get_file_path(self, course_work_id):
-		cache_path = self.get_cache_path()
-		file_path = os.path.join(cache_path, course_work_id + '.json')
-		return file_path
-
-	def put(self, course_work_id, obj):
-		cache_path = self.get_cache_path()
-		if not os.path.exists(cache_path):
-			os.mkdir(cache_path)
-
-		file_path = self.get_file_path(course_work_id)
-		with open(file_path, 'w', encoding='utf-8') as f:
-			json.dump(obj, f, ensure_ascii=False, indent=4)
-
-	def get(self, course_work_id, max_age=0):
-		file_path = self.get_file_path(course_work_id)
-		# print('Checking cache for ' + course_work_id)
-		if os.path.exists(file_path):
-			# print('Cache hit ' + course_work_id)
-			if max_age:
-				age = self.getAge(file_path)
-				if age < max_age:
-					# print('Cache still fresh for ' + course_work_id)
-					with open(file_path) as f:
-						data = json.load(f)
-						return data
-		return None
-
-	def clear(self, course_work_id):
-		file_path = self.get_file_path(course_work_id)
-		if os.path.exists(file_path):
-			os.remove(file_path)
 
 
 def main(argv):
@@ -220,6 +163,6 @@ def main(argv):
 
 if __name__ == '__main__':
 	if len(sys.argv) > 1:
-		main(sys.argv[1:])
+		main(sys.argv[1])
 	else:
-		main(['me'])
+		main('me')
