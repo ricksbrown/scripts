@@ -156,7 +156,8 @@ class Classroom:
 def main(argv):
 	try:
 		nag(argv)
-	except:
+	except Exception as e:
+		print(e)
 		say = get_sayer()
 		say(['Error, something went wrong'])
 
