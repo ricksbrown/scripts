@@ -13,12 +13,22 @@ def get_age(file_path):
 class Cache:
 	cache_root = 'cache'
 
-	def __init__(self, course_id):
+	def __init__(self, course_id, student_name=''):
 		self.course_id = course_id
 
-	def get_cache_path(self):
 		if not os.path.exists(self.cache_root):
 			os.mkdir(self.cache_root)
+	
+		if student_name:
+			self.cache_root = os.path.join(self.cache_root, student_name)
+			if not os.path.exists(self.cache_root):
+				os.mkdir(self.cache_root)
+
+	def get_cache_path(self):
+		return self.cache_root
+	
+
+	def get_cache_path(self):
 		return os.path.join(self.cache_root, self.course_id)
 
 	def get_file_path(self, course_work_id):
