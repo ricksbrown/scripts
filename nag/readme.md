@@ -9,12 +9,15 @@ It is designed to run on our linux HTPC, which we use for pretty much everything
 
 ## Installation
 
-1. Copy [nag.py](nag.py) and [nag.sh](nag.sh) to a directory together, e.g. /home/htpc/apps/nag/
+1. Copy [nag.sh](nag.sh) and all the .py scripts to a directory together, e.g. /home/htpc/projects/homework-nag 
+    
+    Tip: just use git to clone it where you want it
 
 2. Set up cron to run the shell script, something like this:
 
 ```cron
-*/15 * * * * /home/htpc/apps/nag/nag.sh
+15,45 * * * * /home/htpc/projects/homework-nag/nag.sh mary
+00,30 * * * * /home/htpc/projects/homework-nag/nag.sh martha
 ```
 
 3. Install the python requirements:
@@ -30,11 +33,9 @@ chmod +x /home/htpc/apps/nag/nag.sh
 /home/htpc/apps/nag/nag.sh
 ```
 
-On the first run it will attempt to open a new window or tab in your default browser. 
-If this fails, copy the URL from the console and manually open it in your browser. 
+5. Google API Stuff
 
-If you are not already logged into your Google account, you will be prompted to log in. 
-If you are logged into multiple Google accounts, you will be asked to select one account to use for the authorization.
-
-Click the Accept button.
-
+* You need to "Enable The Classroom API" for each student, google it. I did it from [here](https://developers.google.com/classroom/quickstart/python).
+* Create a subdir for each student, e.g. 'mary', 'martha'
+* In each of these you need to provide a file, `credentials.json` which you can DL from [here](https://console.cloud.google.com/apis/credentials) (logged in as each student).
+* On the first run for a given student it will attempt to open a new window or tab in your default browser, approve the access and it will create a `token.pickle` file in the student subdir.

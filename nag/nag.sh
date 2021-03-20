@@ -8,5 +8,5 @@ if ! pactl list sinks | grep -qi "State: running"; then
         echo 'Keeping soundbar awake'
         CWD="$(dirname "$(readlink -f "$0")")"
         cd $CWD
-        /usr/bin/python3 "$CWD/nag.py"
+        /usr/bin/python3 "$CWD/nag.py" ${1:-student_one}
 fi
