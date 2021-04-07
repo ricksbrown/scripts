@@ -1,5 +1,0 @@
-venv/
-cache/
-credentials*.json
-token*.pickle
-__pycache__/
