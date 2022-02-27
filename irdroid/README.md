@@ -9,6 +9,16 @@ Running on Ubuntu, I must have broken the lirc installation on the bare metal. H
 3. Use it:
    `docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_VOLUMEDOWN`
 
+## Control from iPhone
+
+This lets you do "Hey Siri TV Power" or push a shortcut button on the phone desktop.
+
+0. Use the inbuilt Shortcuts app (make sure script shortcuts are enabled in the settings)
+1. New shortcut
+2. Add action `Run script over SSH`
+3. Fill in all the SSH details (host, authentication etc)
+4. Add the script, simply: `docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_POWER`
+
 ## Registering Keyboard Shortcuts
 
 ### Using xbindkeys
