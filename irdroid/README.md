@@ -19,6 +19,14 @@ This lets you do "Hey Siri TV Power" or push a shortcut button on the phone desk
 3. Fill in all the SSH details (host, authentication etc)
 4. Add the script, simply: `docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_POWER`
 
+### Pro Tip
+
+Using the iOS Shortcuts app and `playerctl` it is possible to play/pause stop HTPC playback from iOS too.
+
+On the HTPC: `sudo apt install playerctl`
+
+In the Shortcuts app, ass a SSH shortcut like above but use this script: `playerctl play-pause`
+
 ## Registering Keyboard Shortcuts
 
 ### Using xbindkeys
