@@ -28,3 +28,9 @@ Well this way seems to stop working after the TV has been off for a while.
 Give it whatever name and shortcut, the `Command` can be passed to sh as a string, like so:~~
 
 `sh -c "docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_POWER"`
+
+## Notes
+
+Careful what other dongles are plugged in to USB. I had a Realtek RTL2832U dongle plugged in which caused me issues for days.
+
+Also, I have tried a CEC injector instead of IR - CEC is a load of rubbish, lots of issues.
