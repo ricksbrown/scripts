@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /*
 	This is a MQTT subscriber which listens for messages and executes the appropriate commands.
 
