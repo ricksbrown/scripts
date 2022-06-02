@@ -1,0 +1,17 @@
+// https://www.strava.com/athlete/training
+// Tick "Private"
+// Add any other filters
+// Run in dev tools
+
+function share() {
+	var cbs = document.querySelectorAll("#visibility");
+	[].forEach.call(cbs, (cb) => { cb.value = "everyone" });
+
+	var saves = document.querySelectorAll(".edit-actions .btn-sm");
+	[].forEach.call(saves, (savebtn) => { savebtn.click() });
+}
+
+add this to make commutes:
+
+var commuteCbs = document.getElementsByName("commute");
+[].forEach.call(commuteCbs, (commuteCb) => { commuteCb.checked = true });
