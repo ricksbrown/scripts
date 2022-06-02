@@ -14,8 +14,9 @@ const mqttPort = '1883';
 const clientId = 'htpc_commander';
 const topic = '/htpc';
 
-const tvCommandPrefix = 'docker exec lircnix irsend SEND_ONCE LG_AKB73715601';
-const soundbarCommandPrefix = 'docker exec lircnix irsend SEND_ONCE soundbar';
+// command prefeixes used to start with "docker exec lircnix "
+const tvCommandPrefix = 'irsend SEND_ONCE LG_AKB73715601';
+const soundbarCommandPrefix = 'irsend SEND_ONCE soundbar';
 
 const commandMap = {
 	'tv_voldown': `${tvCommandPrefix} KEY_VOLUMEDOWN`,

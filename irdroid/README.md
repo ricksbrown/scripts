@@ -1,5 +1,7 @@
 # IRDROID
 
+Note: new Ubuntu install, 22.04, does not need this anymore.
+
 Running on Ubuntu, I must have broken the lirc installation on the bare metal. Here I describe how I got this working in a Docker container (it wasn't as easy as you would think).
 
 1. Build the [Dockerfile](Dockerfile):
@@ -18,8 +20,8 @@ This lets you do "Hey Siri TV Power" or push a shortcut button on the phone desk
 2. Add action `Run script over SSH`
 3. Fill in all the SSH details (host, authentication etc)
 4. Add the script, simply: `docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_POWER`
-   
-   For changing the volume, repeat it a few times: 
+
+   For changing the volume, repeat it a few times:
    ```bash
    docker exec lircnix irsend SEND_ONCE LG_AKB73715601 KEY_VOLUMEDOWN KEY_VOLUMEDOWN KEY_VOLUMEDOWN KEY_VOLUMEDOWN KEY_VOLUMEDOWN
    ```
