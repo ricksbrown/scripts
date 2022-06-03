@@ -11,6 +11,19 @@ Obviously NodeJS and NPM must be installed.
 Also this assumes an MQTT broker is installed (I am using Mosquitto right now).
 
 ```bash
+# Install Mosquitto
+
+sudo apt install mosquitto
+sudo vi /etc/mosquitto/mosquitto.conf
+
+# Add these lines:
+listener 1883
+allow_anonymous true
+
+sudo systemctl restart mosquitto
+```
+
+```bash
 # Get the code
 cd /home/htpc/projects
 git clone git@github.com:ricksbrown/scripts.git
