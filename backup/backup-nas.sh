@@ -11,7 +11,8 @@
 # "/mnt/rdocs/" "/mnt/jdocs/" "/mnt/vdocs/"
 # /home/htpc/.config/homeassistant/
 
-declare -a dirs=("/home/htpc/Pictures" "/home/htpc/Music/")
+declare -a dirs=("/home/htpc/Pictures" "/home/htpc/Music/" "/home/htpc/.config/homeassistant/")
+#declare -a dirs=("/home/htpc/.config/homeassistant/")
 
 for DIR in "${dirs[@]}"
 do
@@ -19,8 +20,9 @@ do
 	s3target="s3://petalbear/${dirname}/"
 	if [ -d "$DIR" ]; then
 		echo "Backing up ${DIR} to ${s3target}"
-		s3cmd sync $DIR --delete-removed --preserve $s3target
+		s3cmd sync "$DIR" --delete-removed --preserve "$s3target"
 	else
 		echo "Could not find ${DIR}"
 	fi
 done
+
