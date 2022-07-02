@@ -16,13 +16,12 @@ declare -a dirs=("/home/htpc/Pictures" "/home/htpc/Music/" "/home/htpc/.config/h
 
 for DIR in "${dirs[@]}"
 do
-	dirname="$(basename -- $DIR)"
+	dirname=$(basename -- "${DIR}")
 	s3target="s3://petalbear/${dirname}/"
-	if [ -d "$DIR" ]; then
+	if [ -d "${DIR}" ]; then
 		echo "Backing up ${DIR} to ${s3target}"
-		s3cmd sync "$DIR" --delete-removed --preserve "$s3target"
+		s3cmd sync "${DIR}" --delete-removed --preserve "${s3target}"
 	else
 		echo "Could not find ${DIR}"
 	fi
 done
-
