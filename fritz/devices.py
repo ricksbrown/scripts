@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 ################################################################################
 # Lists all hosts connected to router including their names and IP addresses
 #
