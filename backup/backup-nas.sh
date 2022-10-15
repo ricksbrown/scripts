@@ -14,6 +14,8 @@
 #
 # Also I don't think flock likes sharing users, so for testing don't use flock OR use flock only with the user
 # you will using to run from cron.
+#
+# Read logger from /var/log/syslog, e.g. `tail /var/log/syslog`
 
 # "/mnt/rdocs/" "/mnt/jdocs/" "/mnt/vdocs/"
 # /home/htpc/.config/homeassistant/
@@ -26,9 +28,9 @@ do
 	dirname=$(basename -- "${DIR}")
 	s3target="s3://petalbear/${dirname}/"
 	if [ -d "${DIR}" ]; then
-		echo "Backing up ${DIR} to ${s3target}"
+		logger "Backing up ${DIR} to ${s3target}"
 		s3cmd sync "${DIR}" --delete-removed --preserve "${s3target}"
 	else
-		echo "Could not find ${DIR}"
+		logger "Could not find ${DIR}"
 	fi
 done
