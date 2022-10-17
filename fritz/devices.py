@@ -6,7 +6,11 @@
 # 	pip3 install fritzconnection
 #################################################################################
 import os
+import sys
 from fritzconnection.lib.fritzhosts import FritzHosts
+
+if len(sys.argv) > 0:
+	hosts_format = sys.argv[1] == '--as-hosts'
 
 USER = os.getenv('FRITZ_USERNAME')
 PASSWORD = os.environ.get('FRITZ_PASSWORD')
@@ -20,4 +24,8 @@ for index, host in enumerate(hosts, start=1):
 	ip = host['ip'] if host['ip'] else '-'
 	mac = host['mac'] if host['mac'] else '-'
 	hn = host['name']
-	print(f'{index:>3}: {ip:<16} {hn:<32}  {mac:<17}   {status}')
+	if hosts_format:
+		print(f'{ip:<16} {hn}')
+	else:
+		print(f'{index:>3}: {ip:<16} {hn:<32}  {mac:<17}   {status}')
+
