@@ -8,7 +8,7 @@
 #
 # Read logger from /var/log/syslog, e.g. `tail /var/log/syslog`
 
-declare -a dirs=("/home/htpc/Music" "/home/htpc/Pictures" "/home/htpc/Videos" "/mnt/nas") 
+declare -a dirs=("/mnt/Music" "/mnt/Pictures" "/mnt/Videos" "/mnt/nas") 
 
 for DIR in "${dirs[@]}"
 do
