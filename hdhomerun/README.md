@@ -15,4 +15,4 @@ Assumptions:
 ssh remote-hostname.nord -L 5004:hdhomerun.local:5004 -L 65001:hdhomerun.local:80
 ```
 
-3. Now you should be able to watch TV by opening the following URL in VLC: http://localhost:65001/lineup.m3u
+3. Now you should be able to watch TV by opening the following URL in [IINA](https://iina.io/) or VLC: http://localhost:65001/lineup.m3u
